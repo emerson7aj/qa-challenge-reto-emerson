@@ -3,18 +3,17 @@
 Hola, bienvenid(@) a la prueba para el puesto QA Engineer, a continuación encontrarás una serie de retos que deberás realizar, ten presente que estos no son ejercicios con respuestas válidas o inválidas, es solo para conocer tus habilidades técnicas y prácticas para manejarte en diferentes situaciones que se puedan originar en el día a día laboral.
 
 Nota: 
-Primero debes crear un documento cuyo nombre tenga el siguiente formato: [qa-challenge-reto[nombre].docx] y procedé a colocar allí tus respuestas.
+Primero debes crear un documento cuyo nombre tenga el siguiente formato: qa-challenge-reto[nombre].docx y procedé a colocar allí tus respuestas.
 
 Leer con atención el siguiente contexto:
 
-En el área de TI de UTP surgió la necesidad de realizar un nuevo proyecto de autenticación. El PO registro los siguientes requerimientos:
+En el área de TI de UTP surgió la necesidad de realizar un nuevo proyecto de autenticación. El Product Owner registro los siguientes requerimientos:
 
  - Nueva funcionalidad de login
  - Nueva funcionalidad de registro
 
-### Historia de usuario
+### Historia de usuario Nro. 1
 Como usuario nuevo deseo poder registrarme en la web y poder loguearme de manera satisfactoria.
-
 
 ### Criterios de aceptación
 Los criterios de aceptación para el registro son los siguientes:
