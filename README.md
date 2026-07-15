@@ -63,6 +63,8 @@ A continuación se hace mención de los retos:
 9. Si durante la etapa de ejecución el Product Owner solicita cambios al requerimiento solicitado, ¿Qué considerarías tú que debes hacer?.
 10. Si ya estás en el limite de la fecha programada para la entrega de tu historia de usuario y hay presión para que esta fecha se cumpla ¿Cómo procedes a actuar ante esta situación?
 
+Nota: Coloca tus respuestas en el documento (qa-challenge-reto[nombre].docx)
+
 
 # RETO 2
 ### 📌 Objetivo:
@@ -88,7 +90,7 @@ Niveles de pruebas :
  
 1. Comenta en base a tu criterio que nivel(es) de pruebas aplicarías para cada ambiente (Puedes sugerir otros ambientes u estructura si es que lo consideras)
 
-Nota:(Coloca tus respuestas en el documento ( qa-challenge-reto[nombre].docx ))
+Nota: Coloca tus respuestas en el documento (qa-challenge-reto[nombre].docx)
 
 
 # RETO 4
@@ -109,7 +111,7 @@ Defectos:
 
 1. Para el siguiente conjunto de defectos, prioriza del 1 al 6, siendo 1 el más crítico y explique brevemente el por qué del ordenamiento (puedes incluir alguna suposición que asumas). 
  
-Nota:(Coloca tus respuestas en el documento ( qa-challenge-reto[nombre].docx ))
+Nota: Coloca tus respuestas en el documento (qa-challenge-reto[nombre].docx)
 
 
 # RETO 5
@@ -129,7 +131,7 @@ El equipo de pruebas :
 ### 📌 Objetivos:
 1. Evalúa si los procedimientos de la lista son los más adecuados y brinda al menos 1 alternativa entre tipo de prueba o mejora que desde tu punto de vista se puede plantear a las reglas que no consideres adecuadas o se deba mejorar. 
 
-Nota:(Coloca tus respuestas en el documento ( qa-challenge-reto[nombre].docx)) 
+Nota: Coloca tus respuestas en el documento (qa-challenge-reto[nombre].docx)
 
 
 Recuerda enviar tu archivo al remitente que te mando la evaluación y ante cualquier duda puedes enviar un correo a pao_admin@utp.edu.pe y estaremos encantados de ayudarte. 
