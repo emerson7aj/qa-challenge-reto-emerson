@@ -53,6 +53,10 @@ npm test           # API + E2E completa
 
 Tests que fallan frente a bugs del producto (login sin validación, contraseña de 5 chars en registro) indican **incumplimiento de criterios de aceptación**, no error de la automatización.
 
+### CI en GitHub Actions
+
+Workflow: `.github/workflows/qa-regression.yml` — se dispara en push/PR a `main` y levanta back + front antes de ejecutar Playwright.
+
 ## Envío
 
 1. Enviar `qa-challenge-reto-emerson.docx` al remitente de la evaluación.  

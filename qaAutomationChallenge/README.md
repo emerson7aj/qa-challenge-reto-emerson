@@ -98,9 +98,20 @@ set API_BASE_URL=http://localhost:3000
 set UI_BASE_URL=http://localhost:4000
 ```
 
+## GitHub Actions (CI)
+
+En cada push o PR a `main` se ejecuta el workflow [`.github/workflows/qa-regression.yml`](../.github/workflows/qa-regression.yml):
+
+1. Instala dependencias de `back`, `front` y `qaAutomationChallenge`.
+2. Levanta backend (3000) y frontend (4000).
+3. Ejecuta `npm test` (Playwright API + E2E).
+4. Publica el reporte HTML como artefacto (`playwright-report`).
+
+Algunos tests pueden fallar mientras el producto no cumpla criterios de aceptación (ver sección de defectos conocidos).
+
 ## Escalabilidad (próximos pasos)
 
-- Pipeline CI: levantar `back` y `front`, luego `npm test` en `qaAutomationChallenge`.
+- Etiquetas `@smoke` en CI para subset verde mientras se corrigen bugs del producto.
 - Etiquetas `@smoke` / `@regression` para subsets.
 - Más Page Objects si se añaden pantallas; mismo patrón para nuevos endpoints.
 
