@@ -5,6 +5,7 @@ const port = process.env.PORT || 3000
 const cors = require('cors')
 const passwordService = require('./password')
 const emailService = require('./email')
+const userStore = require('./users')
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -24,22 +25,33 @@ const middleware = (req, res, next) => {
     : next()
 }
 
+const isValidPayload = (email, password) =>
+  emailService.validate(email) && passwordService.isValid(password)
+
 app.post('/register', middleware, (req, res) => {
   const { email, password } = req.body
-  passwordService.length(password) > 5 && emailService.validate(email)
-    ? res.json({
-        code: 201,
-        msg: 'SAVED'
-      })
-    : res.status(422).json({
-        code: 998,
-        msg: 'INVALID'
-      })
+  if (!isValidPayload(email, password)) {
+    return res.status(422).json({
+      code: 998,
+      msg: 'INVALID'
+    })
+  }
+  userStore.save(email, password)
+  return res.json({
+    code: 201,
+    msg: 'SAVED'
+  })
 })
 
 app.post('/login', middleware, (req, res) => {
   const { email, password } = req.body
-  //email === 'email' && password === 'password'
+  if (!isValidPayload(email, password)) {
+    return res.status(422).json({
+      code: 998,
+      msg: 'INVALID'
+    })
+  }
+  return userStore.isValidCredentials(email, password)
     ? res.json({
         code: 201,
         msg: 'LOGIN VALID'

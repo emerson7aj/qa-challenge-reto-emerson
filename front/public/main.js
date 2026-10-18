@@ -16,7 +16,7 @@ if (registerButton){
         const { msg } = response.data
         $msg.innerHTML = msg
     }).catch(function (error) {
-        const { msg } = error.response.data
+        const msg = error.response && error.response.data ? error.response.data.msg : 'ERROR'
         $msg.innerHTML = msg
     })
 })
@@ -40,7 +40,7 @@ loginButton.addEventListener('click', () => {
         const { msg } = response.data
         $msg.innerHTML = msg
     }).catch(function (error) {
-        const { msg } = error.response.data
+        const msg = error.response && error.response.data ? error.response.data.msg : 'ERROR'
         $msg.innerHTML = msg
     })
 })

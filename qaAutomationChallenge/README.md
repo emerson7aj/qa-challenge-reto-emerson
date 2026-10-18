@@ -61,11 +61,6 @@ playwright.config.ts → Proyectos api | e2e-chromium, reporters, retries
 2. **Antes de certificar la HU o un release en QA**: ejecutar `npm test` (API + E2E).
 3. **Interpretación**: los tests validan **criterios de aceptación**, no el comportamiento erróneo actual. Si la app tiene bugs conocidos (login siempre OK, registro rechaza 5 caracteres), la suite **debe fallar** hasta corregir el producto — eso es regresión efectiva.
 
-### Defectos que hoy hacen fallar tests (esperado)
-
-- TC-05: backend usa `length > 5` en lugar de `>= 5` (BUG-R01).
-- TC-07, TC-08, TC-09, TC-10: login no valida credenciales/formato (BUG-L01 … L03).
-
 ## Requisitos previos
 
 - Node.js 18+
@@ -107,7 +102,7 @@ En cada push o PR a `main` se ejecuta el workflow [`.github/workflows/qa-regress
 3. Ejecuta `npm test` (Playwright API + E2E).
 4. Publica el reporte HTML como artefacto (`playwright-report`).
 
-Algunos tests pueden fallar mientras el producto no cumpla criterios de aceptación (ver sección de defectos conocidos).
+El backend del repo incluye las correcciones de validación y login para que la suite refleje los criterios de aceptación en CI.
 
 ## Escalabilidad (próximos pasos)
 
