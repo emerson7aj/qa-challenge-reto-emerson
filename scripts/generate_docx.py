@@ -3,7 +3,7 @@ from docx import Document
 from docx.shared import Pt, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-OUTPUT = r"C:\Users\user\Projects\EvaluacionTecnicaQA\qa-challenge-reto-candidato.docx"
+OUTPUT = r"C:\Users\user\Projects\EvaluacionTecnicaQA\qa-challenge-reto-emerson.docx"
 
 
 def heading(doc, text, level=1):
@@ -42,7 +42,7 @@ def main():
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     para(
         doc,
-        "Nota: Renombrar este archivo a qa-challenge-reto[TuNombre].docx antes de enviarlo.",
+        "Candidato: Emerson — archivo qa-challenge-reto-emerson.docx",
         bold=True,
     )
     doc.add_paragraph()
@@ -79,7 +79,7 @@ def main():
             "Pruebas de límites (boundary): contraseña con exactamente 5 caracteres.",
             "Pruebas de integración front-back: CORS, manejo de errores en axios.",
             "Smoke/Sanity tras cada despliegue en QA.",
-            "Regresión automatizada sobre casos críticos (Reto 2).",
+            "Regresión automatizada sobre casos críticos: suite en carpeta qaAutomationChallenge (ver sección RETO 2).",
         ],
     )
 
@@ -206,6 +206,102 @@ def main():
             "Priorizar pruebas de riesgo alto (seguridad, flujos bloqueantes); diferir mejoras menores.",
             "No omitir evidencia de defectos críticos por presión; buscar extensión mínima o hardening en hotfix.",
         ],
+    )
+
+    # RETO 2
+    heading(doc, "RETO 2 — Automatización E2E y de servicios (regresión)", 1)
+    para(
+        doc,
+        "Objetivo: incorporar pruebas automatizadas que garanticen regresión exitosa sobre los casos clave definidos en la matriz del Reto 1 (TC-01 a TC-10), con arquitectura mantenible y escalable.",
+    )
+
+    heading(doc, "1. Framework y alcance", 2)
+    bullets(
+        doc,
+        [
+            "Framework: Playwright Test (TypeScript) — un solo stack para pruebas de API (request context) y E2E (Chromium).",
+            "Alcance automatizado: flujos de Registro y Login en backend (POST /register, POST /login) y pantallas /register y /login del frontend.",
+            "Ubicación del proyecto: carpeta qaAutomationChallenge/ en la raíz del repositorio de entrega.",
+        ],
+    )
+
+    heading(doc, "2. Arquitectura y buenas prácticas", 2)
+    bullets(
+        doc,
+        [
+            "Page Object Model (POM): RegisterPage y LoginPage encapsulan selectores y acciones UI; los specs E2E solo orquestan pasos de negocio.",
+            "Capa de servicios: AuthApiClient centraliza llamadas HTTP, aserciones de status y validación de msg en JSON.",
+            "Configuración externalizada: URLs en src/config/env.ts y variables API_BASE_URL / UI_BASE_URL para DEV, QA o CI.",
+            "Proyectos Playwright separados (api vs e2e-chromium): ejecutar regresión rápida de API sin abrir navegador, o suite completa.",
+            "Reportes: list en consola + HTML (playwright-report) con screenshots y video en fallos E2E.",
+            "Independencia y paralelismo: tests API sin estado compartido; workers paralelos en CI.",
+        ],
+    )
+
+    heading(doc, "3. Trazabilidad — matriz Reto 1 → automatización", 2)
+    add_table(
+        doc,
+        ["ID matriz", "Automatizado", "Archivo / test", "Tipo"],
+        [
+            ["TC-01", "Sí", "register.api.spec.ts — registro exitoso", "API"],
+            ["TC-02", "Sí", "register.api.spec.ts + login.api.spec.ts — campos vacíos", "API"],
+            ["TC-03", "Sí", "register.api.spec.ts — email sin @", "API"],
+            ["TC-04", "Sí", "register.api.spec.ts — contraseña 4 caracteres", "API"],
+            ["TC-05", "Sí", "register.api.spec.ts — boundary 5 caracteres", "API"],
+            ["TC-06", "Sí", "register.e2e.spec.ts — SAVED, REQUIRED, INVALID en UI", "E2E"],
+            ["TC-07", "Sí", "login.api.spec.ts — credenciales inválidas", "API"],
+            ["TC-08", "Sí", "login.api.spec.ts — email sin @", "API"],
+            ["TC-09", "Sí", "login.api.spec.ts — contraseña < 5", "API"],
+            ["TC-10", "Sí", "login.e2e.spec.ts — REQUIRED e INVALID en UI", "E2E"],
+        ],
+    )
+    para(
+        doc,
+        "Criterio de selección: todos los casos de prioridad Alta de la matriz quedaron automatizados; TC-10 (prioridad Media) cubre login UI. Casos adicionales de exploración manual quedan fuera de la regresión automatizada inicial.",
+    )
+
+    heading(doc, "4. Estrategia de regresión", 2)
+    bullets(
+        doc,
+        [
+            "Smoke automatizado (post-deploy en QA): npm run test:api — valida contrato y reglas de negocio en segundos.",
+            "Regresión funcional UI: npm run test:e2e — valida integración front-back, CORS y mensajes en #msg.",
+            "Regresión completa pre-release: npm test — API + E2E.",
+            "Los tests assertan el comportamiento esperado según criterios de aceptación, no el bug actual: si el producto incumple (p. ej. login siempre exitoso), la suite falla y bloquea un falso Go-Live.",
+            "Evolución: añadir tags (@smoke), pipeline CI (GitHub Actions) ejecutando back+front como servicios y luego Playwright.",
+        ],
+    )
+
+    heading(doc, "5. Estructura del proyecto qaAutomationChallenge", 2)
+    bullets(
+        doc,
+        [
+            "playwright.config.ts — proyectos api/e2e, reporters, trace on retry.",
+            "src/pages/ — Page Objects (RegisterPage, LoginPage).",
+            "src/api/ — AuthApiClient.",
+            "src/config/ — env.ts (URLs).",
+            "tests/api/ — register.api.spec.ts, login.api.spec.ts.",
+            "tests/e2e/ — register.e2e.spec.ts, login.e2e.spec.ts.",
+            "README.md — guía operativa detallada de instalación y ejecución.",
+        ],
+    )
+
+    heading(doc, "6. Cómo ejecutar la automatización (paso a paso)", 2)
+    bullets(
+        doc,
+        [
+            "Terminal 1: cd back && npm install && npm start (puerto 3000).",
+            "Terminal 2: cd front && npm install && npm start (puerto 4000).",
+            "Terminal 3: cd qaAutomationChallenge && npm install && npx playwright install chromium.",
+            "Ejecutar: npm test (completo), npm run test:api o npm run test:e2e (parcial).",
+            "Ver reporte: npm run report tras una ejecución.",
+        ],
+    )
+
+    heading(doc, "7. Resultados esperados vs aplicación bajo prueba", 2)
+    para(
+        doc,
+        "Con el código entregado en el challenge, se esperan fallos en tests que exigen cumplimiento de criterios de aceptación: TC-05 (contraseña de 5 caracteres en registro), TC-07/08/09 (validaciones de login en API) y TC-10 (login inválido en UI). Esos fallos confirman defectos documentados en Reto 1 (BUG-R01, BUG-L01 a L03) y demuestran que la regresión automatizada detecta regresiones/incumplimientos.",
     )
 
     # RETO 3

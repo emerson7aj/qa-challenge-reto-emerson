@@ -1,0 +1,298 @@
+﻿Evaluación Técnica QA — Respuestas
+Candidato: Emerson — archivo qa-challenge-reto-emerson.docx
+
+
+========================================================================
+RETO 1 — CONTROL DE CALIDAD (HISTORIA DE USUARIO: REGISTRO Y LOGIN)
+========================================================================
+
+
+1. Actividades para asegurar un óptimo proceso de control de calidad
+--------------------------------------------------------------------
+
+  • Análisis de requerimientos y criterios de aceptación: revisar la HU con el PO, aclarar ambigüedades (¿5 caracteres inclusive?, mensajes de error esperados, alcance front/back) y obtener criterios medibles.
+  • Revisión estática del código y contratos API (endpoints, códigos HTTP, payloads) para alinear pruebas de servicio y UI antes de ejecutar.
+  • Diseño de casos de prueba (funcionales, negativos, límites) con trazabilidad requisito → caso → evidencia.
+  • Preparación de datos y entorno: levantar front (4000) y back (3000), definir usuarios/correos de prueba y checklist de smoke.
+  • Ejecución manual exploratoria + regresión de casos diseñados; registro de defectos con severidad, pasos, esperado vs actual y capturas.
+  • Automatización de casos críticos (regresión) en pipeline CI cuando el código esté estable.
+  • Reporte de calidad al equipo: resumen de cobertura, riesgos, defectos abiertos y recomendación de release (Go/No-Go).
+¿Por qué? Porque reduce riesgo de escape a producción, da visibilidad temprana de desalineación con criterios de aceptación y documenta decisiones para auditoría y mejora continua.
+
+2. Tipos de prueba aplicables
+-----------------------------
+
+  • Pruebas funcionales: validar registro y login según criterios de aceptación.
+  • Pruebas de API/servicios: POST /register y /login (validaciones, códigos HTTP, mensajes).
+  • Pruebas de UI/E2E: flujos desde el navegador hacia el backend.
+  • Pruebas negativas y de validación: campos vacíos, email sin @, contraseña corta.
+  • Pruebas de límites (boundary): contraseña con exactamente 5 caracteres.
+  • Pruebas de integración front-back: CORS, manejo de errores en axios.
+  • Smoke/Sanity tras cada despliegue en QA.
+  • Regresión automatizada sobre casos críticos: suite en carpeta qaAutomationChallenge (ver sección RETO 2).
+
+3. Técnicas de diseño de casos de prueba (≥4)
+---------------------------------------------
+
+  • Clases de equivalencia: particionar email (válido con @, sin @, vacío) y contraseña (≥5, <5, vacía) para reducir casos redundantes.
+  • Análisis de valores límite: probar 4, 5 y 6 caracteres en contraseña; email con un solo carácter antes/después del @.
+  • Tabla de decisión: combinaciones email/contraseña presentes o ausentes → REQUIRED vs INVALID vs éxito.
+  • Pruebas basadas en estados: usuario no registrado vs registrado (login); hoy el sistema no persiste usuarios — se documenta como gap.
+  • Pairwise (opcional): combinar tipos de email inválido con longitudes de contraseña para cobertura eficiente.
+
+4. Matriz de casos de prueba y orden de ejecución
+-------------------------------------------------
+
+
++-------+--------------+--------------------------------------------+-----------+-------+------------------------------------------------------------+
+| ID    | Módulo       | Caso                                       | Prioridad | Orden | Motivo del orden                                           |
++-------+--------------+--------------------------------------------+-----------+-------+------------------------------------------------------------+
+| TC-01 | API Registro | Registro exitoso email@dominio + pass ≥5   | Alta      | 1     | Smoke: confirma que el flujo feliz y el entorno responden. |
+| TC-02 | API Registro | Campos vacíos → REQUIRED                   | Alta      | 2     | Valida regla obligatoria antes de formatos.                |
+| TC-03 | API Registro | Email sin @ → INVALID                      | Alta      | 3     | Regla de formato crítica.                                  |
+| TC-04 | API Registro | Contraseña 4 caracteres → INVALID          | Alta      | 4     | Límite inferior inválido.                                  |
+| TC-05 | API Registro | Contraseña exactamente 5 caracteres        | Alta      | 5     | Boundary; verifica criterio 'mínimo 5'.                    |
+| TC-06 | UI Registro  | Mismos TC-02 a TC-05 en pantalla /register | Alta      | 6     | Cobertura front + mensaje en #msg.                         |
+| TC-07 | API Login    | Login con credenciales inválidas → error   | Alta      | 7     | Seguridad y criterios de login.                            |
+| TC-08 | API Login    | Email sin @ en login → INVALID             | Alta      | 8     | Paridad con registro.                                      |
+| TC-09 | API Login    | Contraseña <5 en login → INVALID           | Alta      | 9     | Paridad con registro.                                      |
+| TC-10 | UI Login     | Casos negativos y éxito en /login          | Media     | 10    | E2E completo tras validar API.                             |
++-------+--------------+--------------------------------------------+-----------+-------+------------------------------------------------------------+
+
+
+Orden: primero API (aislar capa de negocio), luego UI (depende de API y CORS), de lo general (obligatoriedad) a lo específico (límites), y smoke antes de regresión profunda.
+
+5. Criterios para estimar story points (nuevo en el equipo)
+-----------------------------------------------------------
+
+  • Complejidad funcional: dos flujos (registro + login) con validaciones duplicadas front/back.
+  • Incertidumbre: contratos API, persistencia de usuarios y mensajes UX no detallados → spike o puntos extra.
+  • Dependencias: entornos, datos, posible BD/auth real no implementada.
+  • Riesgo/regulación: manejo de credenciales (aunque sea demo, implica seguridad).
+  • Esfuerzo de prueba: diseño de matriz, ejecución manual, automatización inicial, evidencias.
+  • Comparación con historias referencia del equipo (planning poker) tras explicar supuestos.
+Estimación orientativa: 5–8 SP si incluye automatización básica y certificación front+back; 3–5 SP si solo manual con entorno ya estable.
+
+6. Bugs y mejoras (≥5 bugs y ≥3 mejoras por requerimiento)
+----------------------------------------------------------
+
+
+### Registro
+
+
++---------+--------+-----------+-------------------------------------------+------------------------------+-----------------------------------------------+
+| ID      | Tipo   | Severidad | Descripción                               | Esperado                     | Actual                                        |
++---------+--------+-----------+-------------------------------------------+------------------------------+-----------------------------------------------+
+| BUG-R01 | Bug    | Alta      | Longitud mínima de contraseña             | Aceptar 5 caracteres         | 422 INVALID con 5 chars (usa >5 en server.js) |
+| BUG-R02 | Bug    | Alta      | Validación solo en backend                | Validar en front y back      | Front envía sin validar localmente            |
+| BUG-R03 | Bug    | Media     | Mensajes de error                         | Mensaje claro al usuario     | REQUIRED / INVALID genéricos                  |
+| BUG-R04 | Bug    | Media     | Email débil                               | Email válido con @           | Acepta '@' o '@@' como válido                 |
+| BUG-R05 | Bug    | Alta      | Persistencia                              | Usuario guardado para login  | Siempre SAVED sin almacenamiento              |
+| BUG-R06 | Bug    | Baja      | Atributos HTML                            | Campos required / type=email | type=text sin required                        |
+| IMP-R01 | Mejora | -         | i18n mensajes en español                  | -                            | -                                             |
+| IMP-R02 | Mejora | -         | Hash de contraseña (bcrypt) y BD          | -                            | -                                             |
+| IMP-R03 | Mejora | -         | Feedback UX: loading y deshabilitar botón | -                            | -                                             |
++---------+--------+-----------+-------------------------------------------+------------------------------+-----------------------------------------------+
+
+
+
+### Login
+
+
++---------+--------+-----------+--------------------------------------+-----------------------------------+-----------------------------------------------+
+| ID      | Tipo   | Severidad | Descripción                          | Esperado                          | Actual                                        |
++---------+--------+-----------+--------------------------------------+-----------------------------------+-----------------------------------------------+
+| BUG-L01 | Bug    | Crítica   | Autenticación                        | Rechazar credenciales incorrectas | LOGIN VALID con cualquier email/pass no vacío |
+| BUG-L02 | Bug    | Alta      | Validación email en login            | Rechazar sin @                    | No valida formato en /login                   |
+| BUG-L03 | Bug    | Alta      | Validación contraseña en login       | Mínimo 5 caracteres               | Acepta pass de 3 caracteres                   |
+| BUG-L04 | Bug    | Alta      | Validación front login               | Errores antes de API              | Sin validación cliente                        |
+| BUG-L05 | Bug    | Media     | Código comentado                     | Lógica clara de auth              | Condición de login comentada en server.js     |
+| BUG-L06 | Bug    | Baja      | Código HTTP                          | 200 en login OK                   | 201 LOGIN VALID                               |
+| IMP-L01 | Mejora | -         | Sesión/JWT tras login exitoso        | -                                 | -                                             |
+| IMP-L02 | Mejora | -         | Mensajes específicos por campo       | -                                 | -                                             |
+| IMP-L03 | Mejora | -         | Rate limiting / bloqueo por intentos | -                                 | -                                             |
++---------+--------+-----------+--------------------------------------+-----------------------------------+-----------------------------------------------+
+
+
+
+7. Desarrollador indica que 2 bugs no aplican
+---------------------------------------------
+
+  • Revisar el criterio de aceptación y la HU con evidencia (capturas, request/response).
+  • Sesión breve con dev + PO para alinear alcance; si el PO confirma que no aplica, cerrar como 'No defecto / Cambio de alcance' documentado.
+  • Si sigue en alcance, escalar con impacto en negocio/seguridad y proponer fix o waiver formal con fecha.
+
+8. Bloqueo por dependencias (accesos, data, persona no disponible)
+------------------------------------------------------------------
+
+  • Registrar el bloqueante en el tablero con impacto en fechas.
+  • Usar mocks/stubs locales (datos de prueba, Postman collections) para avanzar en API/UI.
+  • Pedir acceso alterno o ambiente compartido documentado; escalar al TL/PO.
+  • Ejecutar lo posible (casos no bloqueados) y comunicar riesgo residual.
+
+9. PO solicita cambios durante la ejecución
+-------------------------------------------
+
+  • Congelar alcance de la iteración actual o negociar swap de scope.
+  • Impact analysis: casos afectados, regresión, estimación adicional.
+  • Actualizar matriz de prueba y criterios de aceptación por escrito antes de continuar.
+  • Re-priorizar automatización según nuevos riesgos.
+
+10. Fecha límite con presión de entrega
+---------------------------------------
+
+  • Comunicar estado transparente: qué está probado, qué no, defectos abiertos críticos.
+  • Proponer release con riesgo documentado o reducción de alcance acordada con PO.
+  • Priorizar pruebas de riesgo alto (seguridad, flujos bloqueantes); diferir mejoras menores.
+  • No omitir evidencia de defectos críticos por presión; buscar extensión mínima o hardening en hotfix.
+
+========================================================================
+RETO 2 — AUTOMATIZACIÓN E2E Y DE SERVICIOS (REGRESIÓN)
+========================================================================
+
+Objetivo: incorporar pruebas automatizadas que garanticen regresión exitosa sobre los casos clave definidos en la matriz del Reto 1 (TC-01 a TC-10), con arquitectura mantenible y escalable.
+
+1. Framework y alcance
+----------------------
+
+  • Framework: Playwright Test (TypeScript) — un solo stack para pruebas de API (request context) y E2E (Chromium).
+  • Alcance automatizado: flujos de Registro y Login en backend (POST /register, POST /login) y pantallas /register y /login del frontend.
+  • Ubicación del proyecto: carpeta qaAutomationChallenge/ en la raíz del repositorio de entrega.
+
+2. Arquitectura y buenas prácticas
+----------------------------------
+
+  • Page Object Model (POM): RegisterPage y LoginPage encapsulan selectores y acciones UI; los specs E2E solo orquestan pasos de negocio.
+  • Capa de servicios: AuthApiClient centraliza llamadas HTTP, aserciones de status y validación de msg en JSON.
+  • Configuración externalizada: URLs en src/config/env.ts y variables API_BASE_URL / UI_BASE_URL para DEV, QA o CI.
+  • Proyectos Playwright separados (api vs e2e-chromium): ejecutar regresión rápida de API sin abrir navegador, o suite completa.
+  • Reportes: list en consola + HTML (playwright-report) con screenshots y video en fallos E2E.
+  • Independencia y paralelismo: tests API sin estado compartido; workers paralelos en CI.
+
+3. Trazabilidad — matriz Reto 1 → automatización
+------------------------------------------------
+
+
++-----------+--------------+----------------------------------------------------------+------+
+| ID matriz | Automatizado | Archivo / test                                           | Tipo |
++-----------+--------------+----------------------------------------------------------+------+
+| TC-01     | Sí           | register.api.spec.ts — registro exitoso                  | API  |
+| TC-02     | Sí           | register.api.spec.ts + login.api.spec.ts — campos vacíos | API  |
+| TC-03     | Sí           | register.api.spec.ts — email sin @                       | API  |
+| TC-04     | Sí           | register.api.spec.ts — contraseña 4 caracteres           | API  |
+| TC-05     | Sí           | register.api.spec.ts — boundary 5 caracteres             | API  |
+| TC-06     | Sí           | register.e2e.spec.ts — SAVED, REQUIRED, INVALID en UI    | E2E  |
+| TC-07     | Sí           | login.api.spec.ts — credenciales inválidas               | API  |
+| TC-08     | Sí           | login.api.spec.ts — email sin @                          | API  |
+| TC-09     | Sí           | login.api.spec.ts — contraseña < 5                       | API  |
+| TC-10     | Sí           | login.e2e.spec.ts — REQUIRED e INVALID en UI             | E2E  |
++-----------+--------------+----------------------------------------------------------+------+
+
+
+Criterio de selección: todos los casos de prioridad Alta de la matriz quedaron automatizados; TC-10 (prioridad Media) cubre login UI. Casos adicionales de exploración manual quedan fuera de la regresión automatizada inicial.
+
+4. Estrategia de regresión
+--------------------------
+
+  • Smoke automatizado (post-deploy en QA): npm run test:api — valida contrato y reglas de negocio en segundos.
+  • Regresión funcional UI: npm run test:e2e — valida integración front-back, CORS y mensajes en #msg.
+  • Regresión completa pre-release: npm test — API + E2E.
+  • Los tests assertan el comportamiento esperado según criterios de aceptación, no el bug actual: si el producto incumple (p. ej. login siempre exitoso), la suite falla y bloquea un falso Go-Live.
+  • Evolución: añadir tags (@smoke), pipeline CI (GitHub Actions) ejecutando back+front como servicios y luego Playwright.
+
+5. Estructura del proyecto qaAutomationChallenge
+------------------------------------------------
+
+  • playwright.config.ts — proyectos api/e2e, reporters, trace on retry.
+  • src/pages/ — Page Objects (RegisterPage, LoginPage).
+  • src/api/ — AuthApiClient.
+  • src/config/ — env.ts (URLs).
+  • tests/api/ — register.api.spec.ts, login.api.spec.ts.
+  • tests/e2e/ — register.e2e.spec.ts, login.e2e.spec.ts.
+  • README.md — guía operativa detallada de instalación y ejecución.
+
+6. Cómo ejecutar la automatización (paso a paso)
+------------------------------------------------
+
+  • Terminal 1: cd back && npm install && npm start (puerto 3000).
+  • Terminal 2: cd front && npm install && npm start (puerto 4000).
+  • Terminal 3: cd qaAutomationChallenge && npm install && npx playwright install chromium.
+  • Ejecutar: npm test (completo), npm run test:api o npm run test:e2e (parcial).
+  • Ver reporte: npm run report tras una ejecución.
+
+7. Resultados esperados vs aplicación bajo prueba
+-------------------------------------------------
+
+Con el código entregado en el challenge, se esperan fallos en tests que exigen cumplimiento de criterios de aceptación: TC-05 (contraseña de 5 caracteres en registro), TC-07/08/09 (validaciones de login en API) y TC-10 (login inválido en UI). Esos fallos confirman defectos documentados en Reto 1 (BUG-R01, BUG-L01 a L03) y demuestran que la regresión automatizada detecta regresiones/incumplimientos.
+
+========================================================================
+RETO 3 — NIVELES DE PRUEBA POR AMBIENTE
+========================================================================
+
+
++--------------------------+-----------------------------------------------------------------+----------------------------------------------------------+
+| Ambiente                 | Niveles recomendados                                            | Comentario                                               |
++--------------------------+-----------------------------------------------------------------+----------------------------------------------------------+
+| Desarrollo (DEV)         | Unitarias, componentes, contratos API locales                   | Feedback rápido al dev; mocks de servicios externos.     |
+| QA / Test                | Integración, API, E2E automatizada, regresión, exploratoria     | Ambiente estable; datos sintéticos; CI nightly.          |
+| UAT                      | E2E manuales guiados, aceptación usuario, smoke negocio         | Validación con PO/usuarios clave; datos representativos. |
+| Pre-producción / Staging | Smoke, regresión completa, performance ligera, seguridad básica | Paridad con prod; prueba de despliegue.                  |
+| Producción               | Smoke post-deploy, monitoreo, pruebas sintéticas (canary)       | Sin pruebas destructivas; observabilidad.                |
++--------------------------+-----------------------------------------------------------------+----------------------------------------------------------+
+
+
+La pirámide sugiere muchas unitarias/integración en DEV, menos E2E costosos concentrados en QA/UAT/Staging. Producción no sustituye QA pero valida salud del servicio.
+
+========================================================================
+RETO 4 — PRIORIZACIÓN DE DEFECTOS (1 = MÁS CRÍTICO)
+========================================================================
+
+
++-----------+-----------------------------------------+----------------------------------------------------------------------------------------------+
+| Prioridad | Defecto                                 | Justificación breve                                                                          |
++-----------+-----------------------------------------+----------------------------------------------------------------------------------------------+
+| 1         | Credenciales sin cifrar en BD           | Riesgo de seguridad y cumplimiento; exposición masiva de cuentas.                            |
+| 2         | Precios no varían entre monedas         | Impacto directo en dinero del usuario y confianza en compraventa global.                     |
+| 3         | Transacciones no en informe back-end    | Integridad contable/operativa; decisiones de negocio con datos incorrectos.                  |
+| 4         | Ancho de banda 100 MB vs objetivo 50 MB | Degrada experiencia en mercados con conectividad limitada; contradice propuesta de producto. |
+| 5         | Foros no registran comentarios          | Soporte degradado; no bloquea compra pero afecta retención.                                  |
+| 6         | Errores ortográficos en home            | Impacto cosmético en percepción de marca; bajo riesgo funcional.                             |
++-----------+-----------------------------------------+----------------------------------------------------------------------------------------------+
+
+
+Supuestos: plataforma de comercio con pagos reales; cumplimiento de seguridad es no negociable; audiencia internacional.
+
+========================================================================
+RETO 5 — EVALUACIÓN DE PROCEDIMIENTOS AGILE TESTING
+========================================================================
+
+
+### Procedimiento 1
+
+Práctica: Performance en el mismo entorno que usuarios finales
+Evaluación: No ideal: mezcla tráfico real con carga de prueba; riesgo y resultados no reproducibles.
+Alternativa / mejora: Ambiente dedicado de performance (staging) con perfil de carga representativo; pruebas de humo de perf en CI con umbrales; monitoreo APM en prod sin load test invasivo.
+
+### Procedimiento 2
+
+Práctica: Smoke manual cubriendo todas las opciones en cada deploy
+Evaluación: Smoke debe ser rápido y crítico; cubrir 'todo' no es smoke y no escala.
+Alternativa / mejora: Smoke automatizado (15–30 min) de rutas críticas: login, búsqueda, publicar, checkout; exploratoria manual en releases mayores.
+
+### Procedimiento 3
+
+Práctica: Regresión solo en módulos 'probablemente afectados'
+Evaluación: Riesgoso por dependencias ocultas y deuda.
+Alternativa / mejora: Regresión por capas: suite automatizada core en cada PR; regresión completa en release candidate; análisis de impacto como complemento, no único filtro.
+
+### Procedimiento 4
+
+Práctica: Casos en Excel eliminados cada versión
+Evaluación: Pérdida de conocimiento y retrabajo.
+Alternativa / mejora: Repositorio de casos en herramienta de gestión (Xray, TestRail, o repo Git); versionado; reutilización en automatización.
+
+### Procedimiento 5
+
+Práctica: QA involucrado desde etapa inicial
+Evaluación: Adecuado: shift-left, revisión de criterios, TDD/BDD donde aplique.
+Alternativa / mejora: Mantener y reforzar con tres amigos, DoD con criterios testeables y gates de CI.

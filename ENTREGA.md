@@ -4,9 +4,9 @@
 
 | Entregable | Ubicación |
 |------------|-----------|
-| Retos 1, 3, 4 y 5 (documento Word) | `qa-challenge-reto-candidato.docx` → **renombrar** a `qa-challenge-reto[TuNombre].docx` |
+| Retos 1, 3, 4 y 5 | `qa-challenge-reto-emerson.docx` (oficial), `qa-challenge-reto-emerson.txt`, `qa-challenge-reto-emerson.pdf` |
 | Reto 2 (automatización) | Carpeta `qaAutomationChallenge/` |
-| Generador del docx (opcional) | `scripts/generate_docx.py` |
+| Regenerar documentos (opcional) | `python scripts/export_emerson_docs.py` |
 
 ## Cómo ejecutar la aplicación bajo prueba
 
@@ -30,21 +30,31 @@ npm start
 - Login: http://localhost:4000/login  
 - API: http://localhost:3000  
 
-## Cómo ejecutar la automatización (Reto 2)
+## Reto 2 — Automatización (resumen)
 
-Con back y front en ejecución:
+Documentación completa:
+
+- **En el entregable escrito**: sección **RETO 2** en `qa-challenge-reto-emerson.docx` / `.pdf` / `.txt` (objetivo, arquitectura POM + API client, trazabilidad TC-01…TC-10, estrategia de regresión, pasos de ejecución).
+- **En código**: `qaAutomationChallenge/README.md` (guía operativa y mapeo matriz → tests).
+
+La regresión automatizada citada en el Reto 1 es la suite Playwright en `qaAutomationChallenge/` (API + E2E), alineada con los casos críticos de la matriz.
+
+### Ejecución rápida
+
+Con back (3000) y front (4000) en ejecución:
 
 ```bash
 cd qaAutomationChallenge
 npm install
 npx playwright install chromium
-npm test
+npm run test:api   # smoke / regresión servicios
+npm test           # API + E2E completa
 ```
 
-Algunos tests **fallan a propósito** frente a los bugs del código de referencia (login sin validación, contraseña de 5 caracteres en registro). Eso demuestra que la regresión detecta incumplimientos de los criterios de aceptación.
+Tests que fallan frente a bugs del producto (login sin validación, contraseña de 5 chars en registro) indican **incumplimiento de criterios de aceptación**, no error de la automatización.
 
 ## Envío
 
-1. Enviar el `.docx` al remitente de la evaluación.  
-2. Subir este proyecto (o al menos `qaAutomationChallenge`) a **tu** repositorio Git y enviar el enlace por correo (según README del challenge).  
+1. Enviar `qa-challenge-reto-emerson.docx` al remitente de la evaluación.  
+2. Subir el proyecto a **tu** repositorio Git (nombre sugerido: `qa-challenge-reto-emerson`) e incluir la carpeta `qaAutomationChallenge`; enviar el enlace por correo.  
 3. Dudas: pao_admin@utp.edu.pe  

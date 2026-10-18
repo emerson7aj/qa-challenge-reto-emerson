@@ -11,6 +11,10 @@ qaAutomationChallenge/test-results/
 qaAutomationChallenge/playwright-report/
 qaAutomationChallenge/playwright/.cache/
 
+# Python
+__pycache__/
+*.pyc
+
 # OS / editor
 .DS_Store
 Thumbs.db
