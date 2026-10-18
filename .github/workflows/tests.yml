@@ -1,4 +1,4 @@
-name: QA Regression (API + E2E)
+name: Tests
 
 on:
   push:
@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: qa-regression-${{ github.ref }}
+  group: tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  playwright:
-    name: Playwright — Regresión
+  test:
+    name: Playwright
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

@@ -55,7 +55,7 @@ Tests que fallan frente a bugs del producto (login sin validación, contraseña 
 
 ### CI en GitHub Actions
 
-Workflow: `.github/workflows/qa-regression.yml` — se dispara en push/PR a `main` y levanta back + front antes de ejecutar Playwright.
+Workflow: `.github/workflows/tests.yml` (nombre **Tests** en GitHub Actions).
 
 ## Envío
 
