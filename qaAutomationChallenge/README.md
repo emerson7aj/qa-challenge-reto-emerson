@@ -95,7 +95,7 @@ set UI_BASE_URL=http://localhost:4000
 
 ## GitHub Actions
 
-Workflow **[Tests](../.github/workflows/tests.yml)**: push/PR a `main` → instala deps, levanta back/front, ejecuta `npm test`, artefacto `playwright-report`.
+Workflow **[Reto Tecnico CI](../.github/workflows/reto-tecnico-ci.yml)**: push/PR a `main` → instala deps, levanta back/front, ejecuta `npm test`, artefacto `playwright-report`.
 
 ## Escalabilidad (próximos pasos)
 

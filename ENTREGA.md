@@ -55,10 +55,9 @@ Tests que fallan frente a bugs del producto (login sin validación, contraseña 
 
 ### CI en GitHub Actions
 
-Workflow: `.github/workflows/tests.yml` (nombre **Tests** en GitHub Actions).
+Workflow: `.github/workflows/reto-tecnico-ci.yml` (**Reto Tecnico CI**).
 
 ## Envío
 
 1. Enviar `qa-challenge-reto-emerson.docx` al remitente de la evaluación.  
-2. Subir el proyecto a **tu** repositorio Git (nombre sugerido: `qa-challenge-reto-emerson`) e incluir la carpeta `qaAutomationChallenge`; enviar el enlace por correo.  
-3. Dudas: pao_admin@utp.edu.pe  
+2. Enviar el enlace del repositorio (incluye `qaAutomationChallenge/`).  

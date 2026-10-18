@@ -66,9 +66,9 @@ Detalle de arquitectura y trazabilidad TC-01…TC-10: [`qaAutomationChallenge/RE
 
 ## GitHub Actions
 
-Workflow: **[Tests](.github/workflows/tests.yml)**  
+Workflow: **[Reto Tecnico CI](.github/workflows/reto-tecnico-ci.yml)**  
 
-Se ejecuta en cada **push** o **pull request** a `main` (también manual en *Actions → Tests → Run workflow*).
+Se ejecuta en cada **push** o **pull request** a `main` (también manual en *Actions → Reto Tecnico CI → Run workflow*).
 
 1. Instala dependencias (`back`, `front`, `qaAutomationChallenge`).  
 2. Levanta backend y frontend.  
@@ -86,7 +86,3 @@ qaAutomationChallenge/   # Playwright — Reto 2
 qa-challenge-reto-emerson.docx
 scripts/                 # exportación docx/txt/pdf (opcional)
 ```
-
-## Contacto evaluación
-
-Dudas: **pao_admin@utp.edu.pe**
